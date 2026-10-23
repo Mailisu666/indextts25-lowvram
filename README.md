@@ -137,12 +137,42 @@ fp32 路径（1060 这类卡）额外做了一件事：`use_torch_compile` 之�
 
 ### 前提：你得先有一个能跑起来的 IndexTTS-2.5
 
-本仓库**不含模型、不含 Python**。先准备好下面任一份：
+本仓库**不含模型权重、不含 Python 运行时**，只有一个补丁。基础包请从下面任选一条路获取。
 
-- **整合包**（新手推荐）：任何自带 `python_embeded` 文件夹的 IndexTTS-2.5 整合包
-- **官方仓库**：`git clone https://github.com/index-tts/index-tts`，按官方 README 装好依赖并下载模型
+#### ① 整合包（Windows 新手最省事）
 
-**怎么确认手上这份是对的** —— 打开那个文件夹，应该同时看到这三样：
+由 **FutureAI 实验室**制作维护，自带 `python_embeded`、汉化界面和启动脚本，解压即用：
+
+- B 站主页：<https://space.bilibili.com/3546724261956069>（下载方式见其视频/动态简介）
+
+> 本补丁与 FutureAI 实验室无隶属关系，也不是其官方产物。整合包本体的著作权归其作者；本仓库**不转发**整合包（它 18.75 GB，且内含 NVIDIA CUDA 运行库，不在本仓库的授权范围内）。
+
+#### ② 官方仓库（自己配环境，可复现）
+
+```bash
+git clone https://github.com/index-tts/index-tts
+cd index-tts
+# 按官方 README 装依赖（uv 或 pip 均可），CUDA 工具包建议 12.8+
+```
+
+下载权重（~10 GB，任选其一）：
+
+```bash
+# 方式 1：ModelScope（国内快）
+uv tool install "modelscope"
+modelscope download --model IndexTeam/IndexTTS-2.5 --local_dir checkpoints
+
+# 方式 2：HuggingFace
+uv tool install "huggingface-hub"
+hf download IndexTeam/IndexTTS-2.5 --local-dir=checkpoints
+```
+
+- 官方权重页：<https://modelscope.cn/models/IndexTeam/IndexTTS-2.5> ｜ <https://huggingface.co/IndexTeam/IndexTTS-2.5>
+- 体积预期：主模型约 5.1 GB，辅助模型（w2v-BERT / BigVGAN / campplus / semantic codec）约 4.8 GB
+
+#### 怎么确认手上这份是对的
+
+打开那个文件夹，应该同时看到这三样：
 
 ```
 webui.py
@@ -302,5 +332,11 @@ python_embeded\python.exe tools\vram_bench.py
 
 - 依 5.2，本仓库不使用 bilibili / IndexTTS 的商号或商标，仅作来源描述。
 - 若你打算商用，请自行确认许可协议第 2.2 条的规模门槛与第 4.2 条的高风险场景限制。
+
+## 致谢
+
+- **[bilibili / index-tts](https://github.com/index-tts/index-tts)** —— IndexTTS-2.5 模型与原始代码的作者。
+- **[FutureAI 实验室](https://space.bilibili.com/3546724261956069)** —— Windows 整合包的制作者，本补丁是在其整合包上验证并打磨的；整合包本体请从其发布渠道获取。
+- **[NVIDIA/BigVGAN](https://github.com/NVIDIA/BigVGAN)**、**[wenet](https://github.com/wenet-e2e/wenet)** 等上游项目 —— 声码器与说话人编码的实现来源。
 
 本项目与 bilibili、index-tts 官方团队、以及任何整合包作者均无关联。
