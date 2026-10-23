@@ -143,7 +143,7 @@ fp32 路径（1060 这类卡）额外做了一件事：`use_torch_compile` 之�
 
 由 **FutureAI 实验室**制作维护，自带 `python_embeded`、汉化界面和启动脚本，解压即用：
 
-- B 站主页：[<https://space.bilibili.com/3546724261956069>] B站具体下载链接位置：(https://www.bilibili.com/video/BV1Vibk6SERt/?spm_id_from=333.1387.upload.video_card.click&vd_source=721312d2c7741ca97a3b6e524fc6372a)（下载方式见其视频/动态简介）
+- 整合包下载（UP 主视频简介里）：<https://www.bilibili.com/video/BV1Vibk6SERt/>
 
 > 本补丁与 FutureAI 实验室无隶属关系，也不是其官方产物。整合包本体的著作权归其作者；本仓库**不转发**整合包（它 18.75 GB，且内含 NVIDIA CUDA 运行库，不在本仓库的授权范围内）。
 
