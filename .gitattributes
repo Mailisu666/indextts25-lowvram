@@ -1,0 +1,8 @@
+* text=auto
+*.py  text eol=lf
+*.md  text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+LICENSE      text eol=lf
+LICENSE_ZH.txt text eol=lf
+NOTICE       text eol=lf

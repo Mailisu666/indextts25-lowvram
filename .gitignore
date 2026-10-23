@@ -1,0 +1,18 @@
+# installer backups
+*.bak_pre_lowvram
+*.orig_bf16
+
+# python
+__pycache__/
+*.py[cod]
+
+# probe output
+*.wav
+probe_out.*
+vram_profile.json
+
+# editors / os
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

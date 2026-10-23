@@ -1,0 +1,41 @@
+IndexTTS-2.5 Low-VRAM Patch
+===========================
+
+This repository contains patches and launchers only. It contains no model
+weights and no third-party runtime.
+
+Upstream model and code
+-----------------------
+IndexTTS-2.5 is created and owned by bilibili (index-tts project).
+    https://github.com/index-tts/index-tts
+The original license is included as LICENSE (English) and LICENSE_ZH.txt
+(Chinese, "bilibili 模型使用许可协议"). All rights to the model, its weights and
+the original code remain with bilibili.
+
+What this repository adds
+-------------------------
+* indextts/vram.py            - capability-based dtype selection and stage swapping
+* apply.py                    - installer that patches an existing installation
+* launchers/webui_6g.bat      - launcher with low-VRAM defaults
+* tools/vram_bench.py         - per-GPU fp32/fp16/bf16 measurement
+* tools/e2e_probe.py          - reproduction script for the README numbers
+
+Required statement (license section 4.1(a))
+-------------------------------------------
+   该衍生品对原模型所作的任何改动与原模型原始权利人无关，原始权利人对该
+   衍生品不背书、不担保、不承担责任。
+
+   Any changes this derivative makes to the original model are unrelated to the
+   original rights holder, who does not endorse, warrant or assume liability for
+   this derivative.
+
+Attribution (license section 3.4(b))
+------------------------------------
+If you redistribute this patch set, keep LICENSE, LICENSE_ZH.txt and this NOTICE
+file with it, and do not use the bilibili or IndexTTS names or logos as branding
+(license section 5.2).
+
+No affiliation
+--------------
+This project is not affiliated with, endorsed by, or supported by bilibili, the
+index-tts team, or the author of any bundled distribution it may be applied to.
