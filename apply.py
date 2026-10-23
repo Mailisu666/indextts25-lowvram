@@ -295,8 +295,15 @@ def main():
 
     launcher = os.path.join(HERE, "launchers", "webui_6g.bat")
     if not args.no_launcher and os.path.isfile(launcher):
-        shutil.copy2(launcher, os.path.join(root, "webui_6g.bat"))
-        print("  ok   copy webui_6g.bat")
+        # cmd.exe mis-parses .bat files whose lines end in bare LF (the window just
+        # closes and nothing happens), so write the launcher with CRLF no matter
+        # how git checked this repository out.
+        with open(launcher, "rb") as handle:
+            data = handle.read()
+        data = data.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+        with open(os.path.join(root, "webui_6g.bat"), "wb") as handle:
+            handle.write(data)
+        print("  ok   copy webui_6g.bat (CRLF)")
 
     if args.dry_run:
         print(f"dry run: {total} patch(es) would be applied")
