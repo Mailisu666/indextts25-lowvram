@@ -4,6 +4,13 @@
 
 本仓库只包含**补丁与脚本**，不含模型权重、不含整合包的 Python 运行时。你需要一份已经能正常运行的 IndexTTS-2.5 环境（官方仓库或任意整合包）。
 
+> **只想赶紧用上？** 三步：
+> 1. 双击本仓库里的 **`INSTALL.cmd`**
+> 2. 把你那个 IndexTTS 文件夹**拖进黑窗口**，回车
+> 3. 双击 IndexTTS 目录里新出现的 **`webui_6g.bat`**，浏览器开 <http://127.0.0.1:7860>
+>
+> 装不上或想搞清楚原理，往下看「安装」章节。
+
 ---
 
 ## 实测结果
@@ -128,19 +135,50 @@ fp32 路径（1060 这类卡）额外做了一件事：`use_torch_compile` 之�
 
 ## 安装
 
-需要：一份能跑起来的 IndexTTS-2.5 环境（自带 `python_embeded` 的整合包，或官方仓库）。
+### 前提：你得先有一个能跑起来的 IndexTTS-2.5
+
+本仓库**不含模型、不含 Python**。先准备好下面任一份：
+
+- **整合包**（新手推荐）：任何自带 `python_embeded` 文件夹的 IndexTTS-2.5 整合包
+- **官方仓库**：`git clone https://github.com/index-tts/index-tts`，按官方 README 装好依赖并下载模型
+
+**怎么确认手上这份是对的** —— 打开那个文件夹，应该同时看到这三样：
+
+```
+webui.py
+indextts\
+checkpoints\          ← 里面有 gpt.pth / s2mel.pth / codec.pth，通常共 5~7 GB
+```
+
+并且**原版能正常启动过一次**（原版都跑不起来，打补丁没有意义）。
+
+### 方式 A：双击安装（推荐，不用敲命令）
+
+1. 把本仓库下载（Code → Download ZIP）或 `git clone` 到**任意位置**（不需要放进 IndexTTS 目录）
+2. 双击仓库里的 **`INSTALL.cmd`**
+3. 把上面那个 IndexTTS 文件夹**拖进黑窗口**，回车
+4. 看到 `Done.` 后，双击 `<你的 IndexTTS 目录>\webui_6g.bat`
+5. 浏览器打开 <http://127.0.0.1:7860>
+
+`INSTALL.cmd` 会自动找 Python（优先包内自带的 `python_embeded`，其次系统里的），并检查目标目录是否含 `webui.py`、是否为 2.5 版本。**安装器本身不需要 torch**，任何 Python 3.8+ 都能跑。
+
+### 方式 B：命令行
 
 ```bat
+cd /d "解压出来的仓库目录"
 python apply.py --root "D:\你的\IndexTTS2.5目录"
 ```
 
-脚本会：
+- 想先看会改什么、不实际写入：末尾加 `--dry-run`
+- `python` 可以是任意 3.8+ 解释器，也可以是包内的 `python_embeded\python.exe`
+
+脚本会做五件事：
 
 1. 复制 `vram.py` 到 `<目录>\indextts\vram.py`
 2. 给 `indextts/infer_v2_5.py` 打补丁（精度选择 + 分阶段换驻）
 3. 给 `webui.py` 加 `--dtype` / `--lowvram` 参数
 4. 每个被改动的文件旁边留一份 `*.bak_pre_lowvram` 备份
-5. 复制启动器 `webui_6g.bat`
+5. 复制启动器 `webui_6g.bat` 到包根目录
 
 安全说明：
 
@@ -149,14 +187,54 @@ python apply.py --root "D:\你的\IndexTTS2.5目录"
 - **幂等**：重复运行是空操作
 - 不改动的文件不会被碰
 
-然后双击 `webui_6g.bat`，浏览器打开 `http://127.0.0.1:7860`。
+### 官方仓库用户注意
 
-### 回滚
+`webui_6g.bat` 是照整合包结构写的（调用 `python_embeded\python.exe`），官方仓库环境请手动启动：
+
+```bash
+uv run webui.py --version 2.5 --model_dir ./checkpoints_25 --fp16 --cuda_kernel --gui_seg_tokens 60
+```
+
+`--fp16` 只是"请求半精度"，最终用 fp16 还是 bf16 由补丁按显卡决定。
+
+### 装好了怎么确认
+
+启动日志里应出现这几行（数值随卡不同）：
+
+```
+>> half precision: fp16 (Turing/Volta: BF16 is emulated, FP16 is fast)
+>> low-VRAM plan: stage swapping enabled (6.0 GB card)
+>> low-VRAM: parked in RAM [w2v_bert, campplus], stage-swapped [semantic_codec, cfm, bigvgan]
+>> VRAM after load: 4.29/6.00 GB used, torch reserved 3.28 GB, peak 3.47 GB
+```
+
+8GB 以上的卡**不会**出现 `low-VRAM plan` 那行 —— 这是正常的，说明换驻未启用（你要的就是原版满血路径）。
+
+### 常见问题
+
+| 现象 | 原因与解决 |
+|---|---|
+| `[ERROR] ...\webui.py not found` | 拖进去的不是包根目录。要选**直接包含 `webui.py` 的那一层**，不是它的上一层，也不是 `indextts` 子目录 |
+| `[ERROR] ...\indextts\infer_v2_5.py not found` | 这是 IndexTTS 1.x 或 2.0，本补丁只支持 2.5 |
+| `anchor not found - was this file modified upstream?` | 你的包版本与本补丁不同，或该文件已被手动改过。**此时没有任何文件被修改**，可用 `--dry-run` 看卡在哪一条 |
+| 双击 `webui_6g.bat` 闪一下就没了 | 在 cmd 里手动运行它看报错。多半是包内没有 `python_embeded`（官方仓库环境请按上文手动启动） |
+| 启动报 `indextts\vram.py` 找不到 | 安装器没跑成功，重跑 `INSTALL.cmd` |
+| 卡在 `Running on local URL` 之前很久、控制台没输出 | 正常，首次加载 1~3 分钟，期间无输出 |
+| 生成时 `CUDA out of memory` | 把 `INDEXTTS_CHUNK_CHARS` 调小（如 `25`），或关掉浏览器硬件加速等占显卡的程序 |
+| 生成的音频有爆音/杂音 | 少数情况下 fp16 数值溢出。设 `INDEXTTS_DTYPE=fp32` 再试，或按下面回滚 |
+
+### 回滚 / 卸载
+
+在 IndexTTS 目录里执行：
 
 ```bat
 copy /y "indextts\infer_v2_5.py.bak_pre_lowvram" "indextts\infer_v2_5.py"
 copy /y "webui.py.bak_pre_lowvram" "webui.py"
+del "indextts\vram.py"
+del "webui_6g.bat"
 ```
+
+等价于没装过；模型权重全程未被改动。
 
 ---
 
